@@ -1,0 +1,43 @@
+16/8/23
+Probando emscripten y como permite cargar modulos de forma dinamica
+
+17/8/23
+Intentando pasar datos complejos entre modulos, rehacemos lo del dia anterior de formas mas eficaz y podemos pasar datos complejos
+
+18/8/23
+Makefile, compilacion para web y escritorio, intentamos compilar raylib, no se consigue que funcione en web
+
+19/8/23
+Raylib para web y escritorio. Haciendo lo imposible para subir archivos binarios al servidor
+
+20/8/23
+Subimos al servidor, podemos ejecutar algoritmos subidos, no podemos cargar nuevos algoritmos sin reiniciar la página (caché?)
+
+21/8/23
+intentamos fragmentar la informacion del post
+
+22/8/23
+El servidor recibe la informacion correctamente, el cliente recibe la respuesta y usa el modulo correctamente
+
+23/8/23
+Intentando la representacion 3d de mazmorras. Acabo teniedo problemas para compilar la version de escritorio (recuerda borrar los .o cuando vaya a compilar una version distinta)
+
+24/8/23
+Pruebas de visualizacion 3d. Fallo grave al hacer fetch, posible buffer overflow. 
+
+25/8/23
+Pensado empezar de cero el codigo
+
+28/8/23
+Im back
+He eliminado el error de python que daba al compilar desde hace tiempo:
+    he instalado htmlmin
+    he modificado /usr/share/emscripten/emcc.py linea 3624-3647:
+        he eliminado la variable opts, he creado una variable (check) a la que se añade todo
+Parece que rehacer el codigo ha arreglado errores (c_str no aloja memoria parece), ahora hay nuevos problemas
+
+29/8/23
+Menu interactivo (obtiene informacion desde el servidor), carga de modulos desde el menu. Eliminacion de modulos. Interaccion desde movil. Ventana reescalable
+
+30/8/23
+Mejora de la ventana reescalable
