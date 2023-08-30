@@ -3,15 +3,15 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}/code/include/**",
                 "/usr/share/emscripten/cache/sysroot/include/**",
                 "/home/oneleggedguy/Code/raylib/src/**",
-                "${workspaceFolder}/test/code2/include/**"
+                "${workspaceFolder}/**"
             ],
             "defines": [],
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-clang-x64"
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

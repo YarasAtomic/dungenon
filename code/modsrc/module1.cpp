@@ -2,8 +2,8 @@
 #include <emscripten.h>
 #endif
 #include <vector>
-#include "ezdungeon.h"
 #include <iostream>
+#include "ezdungeon.h"
 
 extern "C" {
 

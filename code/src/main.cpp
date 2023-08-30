@@ -1,47 +1,6 @@
+#include <raylib.h>
 #include "emscripten_browser_file.h"
 #include "main.h"
-
-void freeDungeon(struct dungeonMatrix ** dgn)
-{
-    if((*dgn) == nullptr) return;
-
-    for(int i = 0; i < (*dgn)->size_x;i++)
-    {
-        for(int j = 0; j < (*dgn)->size_y;j++)
-        {
-            free((*dgn)->data[i][j]);
-        }
-        free((*dgn)->data[i]);
-    }
-    free((*dgn)->data);
-    free((*dgn));
-}
-
-void cpyDungeon(dungeonMatrix ** destination, dungeonMatrix * source)
-{
-    freeDungeon(destination);
-
-    (*destination) = static_cast<struct dungeonMatrix*>(malloc(sizeof(struct dungeonMatrix)));
-
-    (*destination)->data = (unsigned int ***)malloc(source->size_x * sizeof(unsigned int **));
-    for(int i = 0 ; i < source->size_x; i++)
-    {
-        (*destination)->data[i] = (unsigned int **)malloc(source->size_y * sizeof(unsigned int *));
-        for(int j = 0 ; j < source->size_y; j++)
-            (*destination)->data[i][j] = (unsigned int *)malloc(source->size_z * sizeof(unsigned int));
-    }
-
-    (*destination)->size_x = source->size_x;
-    (*destination)->size_y = source->size_y;
-    (*destination)->size_z = source->size_z;
-
-    (*destination)->err = source->err;
-
-    for(int i = 0 ; i < source->size_x; i++)
-        for(int j = 0 ; j < source->size_y; j++)
-            for(int k = 0 ; k < source->size_z; k++)
-                (*destination)->data[i][j][k] = source->data[i][j][k];
-}
 
 int openModule(std::string name,dungeonMatrix ** dungeon)
 {
@@ -147,17 +106,53 @@ void raylib()
 
     dungeonMatrix * currentDungeon = nullptr;
 
+    // Gui
     ScrollMenu moduleMenu(10,40,150,menuInteraction);
 
     #ifdef __EMSCRIPTEN__
     getModuleNames();
     #endif
 
+    // Lights
+
+    // Shader lightShader = LoadShader(TextFormat("/resources/shaders/glsl%i/lighting.vs", GLSL_VERSION),
+    //                            TextFormat("/resources/shaders/glsl%i/lighting.fs", GLSL_VERSION));
+
+    std::string vShader = "";
+    std::string fShader = "";
+    bool loadedShaders = false;
+
+    getShader("https://raw.githubusercontent.com/raysan5/raylib/master/examples/shaders/resources/shaders/glsl100/lighting.vs",&vShader);
+    getShader("https://raw.githubusercontent.com/raysan5/raylib/master/examples/shaders/resources/shaders/glsl100/lighting.fs",&fShader);
+
+    Light global;
+
+    Shader lightShader;
+
     while (!WindowShouldClose()) { // Main loop
         // Render update
+        float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
+
         ClearBackground(BLACK);
 
         UpdateCamera(&camera,CAMERA_ORBITAL);
+
+        if(!loadedShaders && vShader!="" && fShader!= "")
+        {
+            loadedShaders = true;
+            lightShader = LoadShaderFromMemory(vShader.c_str(),fShader.c_str());
+
+            lightShader.locs[SHADER_LOC_VECTOR_VIEW] =  GetShaderLocation(lightShader,"viewPos");
+
+            int ambientLoc = GetShaderLocation(lightShader,"ambient");
+            SetShaderValue(lightShader,ambientLoc,(float[4]){0.3f,0.3f,0.3f,1.0f},SHADER_UNIFORM_VEC4);
+
+            global = CreateLight(LIGHT_DIRECTIONAL,(Vector3){3,2,1},(Vector3){0,0,0},RAYWHITE,lightShader);
+        }
+
+        SetShaderValue(lightShader,lightShader.locs[SHADER_LOC_VECTOR_VIEW],cameraPos,SHADER_UNIFORM_VEC3);
+
+        UpdateLightValues(lightShader,global);
 
         // Update
         moduleMenu.update();
@@ -198,7 +193,7 @@ void raylib()
             // Try to load module
             if(openModule(currentModFileId,&currentDungeon)==0)
             {
-                // Module loaded
+                // Module loadedS
                 if(currentDungeon->size_y>1) 
                 {
                     Mesh dungeonMesh = meshFromDungeon(currentDungeon);
@@ -226,7 +221,11 @@ void raylib()
             }
 
         }
+        else if(loadedShaders)
+            dungeonModel.materials[0].shader = lightShader;
 
+
+        BeginDrawing();
 
         // Is module loaded?
         if(isModuleLoaded)
@@ -243,8 +242,7 @@ void raylib()
             else
             {
                 BeginMode3D(camera);
-
-                DrawModel(dungeonModel,dungeonPos,1,GRAY);
+                DrawModel(dungeonModel,dungeonPos,1.0f,GRAY);
 
                 EndMode3D();
             }
@@ -264,8 +262,6 @@ void raylib()
         }
 
         moduleMenu.draw(0,0);
-
-        BeginDrawing();
         
         
         EndDrawing();

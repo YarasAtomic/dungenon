@@ -207,3 +207,31 @@ void clearModules()
 
     emscripten_fetch(&attr, "/get");
 }
+
+// Get shader
+void loadShaderCallback(emscripten_fetch_t* fetch) {
+    std::vector<unsigned char> fileContent(fetch->data, fetch->data + fetch->numBytes);
+    std::string loadedShader;
+    // Aquí puedes procesar el contenido del archivo como desees
+    for (size_t i = 0; i < fetch->numBytes; ++i) {
+        loadedShader += fileContent[i];
+    }
+
+    *((std::string *)fetch->userData)=loadedShader;
+
+    // Liberar la memoria del buffer
+    emscripten_fetch_close(fetch);
+}
+
+void getShader(std::string url,std::string * buffer)
+{
+    emscripten_fetch_attr_t attr;
+    emscripten_fetch_attr_init(&attr);
+    strcpy(attr.requestMethod, "GET");
+    attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+    attr.onsuccess = loadShaderCallback;
+    attr.userData = (void*)buffer;
+
+    // Realizar la operación de carga utilizando Emscripten Fetch API
+    emscripten_fetch(&attr, url.c_str());
+}

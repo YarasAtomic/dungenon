@@ -1,7 +1,5 @@
 #include "gui.h"
 
-
-
 ScrollMenu::ScrollMenu()
 {
     this->width = 150;
@@ -77,7 +75,6 @@ void ScrollMenu::updateInteraction(unsigned int posX, unsigned int posY)
 
     if(pressed)
     {
-        std::cout << "pressed " << GetTouchPosition(0).x << " " << GetTouchPosition(0).y << std::endl;
         if(mouseX<width-scrollBarWidth)
         // Interacting with items
         {

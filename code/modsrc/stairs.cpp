@@ -2,8 +2,8 @@
 #include <emscripten.h>
 #endif
 #include <vector>
-#include <iostream>
 #include "ezdungeon.h"
+#include <iostream>
 
 extern "C" {
 
@@ -12,7 +12,7 @@ EMSCRIPTEN_KEEPALIVE
 #endif
 struct dungeonMatrix *  genDungeon(int args,const char**argv)
 {
-    const int size = 10;
+    const int size = 3;
 
     struct dungeonMatrix* dungeon = static_cast<struct dungeonMatrix*>(malloc(sizeof(struct dungeonMatrix)));
 
@@ -26,19 +26,20 @@ struct dungeonMatrix *  genDungeon(int args,const char**argv)
 
     dungeon->data = data;
     dungeon->size_x = size;
-    dungeon->size_y = 1;
+    dungeon->size_y = size;
     dungeon->size_z = size;
 
     for(int i = 0 ; i < size; i++)
         for(int j = 0 ; j < size; j++)
             for(int k = 0 ; k < size; k++)
-                data[i][j][k] = 0;
+            {
+                if((size-j-1)==k)
+                    dungeon->data[i][j][k] = DUN_PXY_WALL | DUN_PXZ_WALL;
+                else
+                    dungeon->data[i][j][k] = 0;
 
-    data[1][0][1] = DUN_FULL_BLOCK;
-    data[1][0][8] = DUN_FULL_BLOCK;
+            }
 
-    data[8][0][4] = DUN_FULL_BLOCK;
-    data[8][0][3] = DUN_FULL_BLOCK;
 
     dungeon->err = 0;
 
